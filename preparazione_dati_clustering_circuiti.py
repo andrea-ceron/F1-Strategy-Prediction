@@ -269,6 +269,9 @@ def estrazione_feature_circuito(anno, circuito, tipo):
     session = fastf1.get_session(anno, circuito, tipo)
     session.load(telemetry=True, weather=False, messages=False)
     lap = session.laps.pick_fastest()
+    if lap is None or lap.empty or pd.isna(lap['LapTime']):
+        raise ValueError('Nessun giro veloce valido disponibile per la sessione')
+    print(f'{circuito} {anno} - {tipo}: giro piu veloce di {lap["Driver"]}, tempo {lap["LapTime"]}')
     pos = lap.get_pos_data()
     posizioni = pd.DataFrame({'X [m]': pos.X / 10, 'Y [m]': pos.Y / 10, 'time': pos.Time})
     print(posizioni)
@@ -287,7 +290,24 @@ def estrazione_feature_circuito(anno, circuito, tipo):
     salva_immagine(tabella_classificata, curve, Path(__file__).parent / 'output' / f'curve_individuate_{circuito}_{anno}_{tipo} .png')
 
 def main():
-    estrazione_feature_circuito(2025, 'Las Vegas Grand Prix', 'Q')
+    circuiti = [
+        'Italian Grand Prix',
+        'Monaco Grand Prix',
+        'British Grand Prix',
+        'Belgian Grand Prix',
+        'Spanish Grand Prix',
+    ]
+    anni = [2024, 2025, 2026]
+    tipo = 'Q'
+
+    for circuito in circuiti:
+        for anno in anni:
+            print(f'\nElaborazione: {circuito} {anno} - {tipo}')
+            try:
+                estrazione_feature_circuito(anno, circuito, tipo)
+            except Exception as errore:
+                print(f'Elaborazione non completata per {circuito} {anno}: '
+                      f'{type(errore).__name__}: {errore}')
     
 
 
