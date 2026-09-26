@@ -1,0 +1,8 @@
+.fastf1-cache/
+__pycache__/
+.venv/
+outputs/
+pratica.py
+traiettorie_xy.py
+test_curvatura.py\
+dir
